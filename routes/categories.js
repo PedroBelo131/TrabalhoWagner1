@@ -6,8 +6,13 @@ export default async function categories(app, options) {
     const products = app.mongo.db.collection('products');
 
     app.get('/categories',
+        {
+            config: {
+                logMe: true
+            }
+        },
         async (request, reply) => {
-            request.log.info(categories);
+            //request.log.info(categories);
             return await products.find().toArray();
         }
     );
@@ -26,7 +31,7 @@ export default async function categories(app, options) {
                 properties: {
                     id: { type: 'integer' },
                     name: { type: 'string' },
-                    productName: {type: 'string'}
+                    img_Url: {type: 'string'}
                 },
                 required: ['name','img_Url']
             }
@@ -71,39 +76,6 @@ export default async function categories(app, options) {
         
         return reply.code(204).send();;
     });
-/*
-    app.get('/categories/:id/products', async (request, reply) => {
-        try {
-            let id = request.params.id;
-    
-            let schema = {
-                params: {
-                    type: 'object',
-                    properties: {
-                        id: { type: 'integer' }
-                    },
-                    required: ['id']
-                }
-            };
-    
-            let category = await categories.findOne({ _id: id });
-            if (!category) {
-                throw new Error('Categoria não encontrada');
-            }
-            let categoryName = category.name;
-    
-            let productsCategory = await products.find({ category: categoryName }).toArray();
-            if(!productsCategory.params){
-                throw new error(204);
-            }
-            return productsCategory
-            
-        } catch (error) {
-            console.error(error);
-            reply.status(400).send({ error: error.message });
-        }
-    });
-*/
 
 app.get('/categories/:id/products', async (request, reply) => {
     try {
