@@ -26,7 +26,7 @@ export default async function categories(app, options) {
                 properties: {
                     id: { type: 'integer' },
                     name: { type: 'string' },
-                    img_URL: {type: 'string'}
+                    productName: {type: 'string'}
                 },
                 required: ['name','img_Url']
             }
@@ -71,13 +71,67 @@ export default async function categories(app, options) {
         
         return reply.code(204).send();;
     });
+/*
+    app.get('/categories/:id/products', async (request, reply) => {
+        try {
+            let id = request.params.id;
+    
+            let schema = {
+                params: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' }
+                    },
+                    required: ['id']
+                }
+            };
+    
+            let category = await categories.findOne({ _id: id });
+            if (!category) {
+                throw new Error('Categoria não encontrada');
+            }
+            let categoryName = category.name;
+    
+            let productsCategory = await products.find({ category: categoryName }).toArray();
+            if(!productsCategory.params){
+                throw new error(204);
+            }
+            return productsCategory
+            
+        } catch (error) {
+            console.error(error);
+            reply.status(400).send({ error: error.message });
+        }
+    });
+*/
 
-    app.get('/categories/:id/products', async (request, reply) =>{
-        let id = request.params.id;
-        let category = await categories.findOne({_id: new app.mongo.ObjectId(id)})
-        let categoryName = category.name;
-        let productCategory = await products.find({category: categoryName}).toArray();
+app.get('/categories/:id/products', async (request, reply) => {
+    try {
+        const id = request.params.id;
 
-        return productCategory;
-    })
+        // Consulta para encontrar a categoria pelo _id
+        const category = await categories.findOne({ name: id });
+
+        if (!category) {
+            // Categoria não encontrada, retorna um código de status 404
+            throw new Error('Categoria não encontrada');
+        }
+
+        // Consulta para encontrar os produtos com base no nome da categoria
+        const productsCategory = await products.find({ category: category.name }).toArray();
+
+        if (productsCategory.length === 0) {
+            // Nenhum produto encontrado para esta categoria, retorna um código de status 204
+            return reply.status(204).send();
+        }
+
+        // Retorna os produtos encontrados
+        return productsCategory;
+        
+    } catch (error) {
+        console.error(error);
+        // Retorna um código de status 400 (Bad Request) em caso de erro
+        reply.status(400).send({ error: error.message });
+    }
+});
 }
